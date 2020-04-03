@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from helpers import *
+from helpers import videorange
 
 class GetRect():
     def __init__(self):

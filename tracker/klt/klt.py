@@ -4,7 +4,7 @@ import cv2
 import imageio
 
 from drawBoundingRect import GetRect
-from helpers import *
+from helpers import videorange
 
 #See: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_video/py_lucas_kanade/py_lucas_kanade.html#lucas-kanade-optical-flow-in-opencv
 
@@ -37,7 +37,7 @@ boxes = G.drawBoundingRect(old_frame) #shape: (#boxes, #points, 2)
 
 # Use only one box
 box = boxes[0]
-print(box)
+#print(box)
 
 # make mask for goodFeaturesToTrack
 minx, miny = np.amin(box, axis=0)
@@ -46,19 +46,21 @@ mask = np.zeros_like(old_gray)
 mask[miny:maxy, minx:maxx] = 1
 
 p0 = cv2.goodFeaturesToTrack(old_gray, mask = mask, **feature_params)
-print(p0)
+print(p0.shape)
 
 # Create a mask image for drawing purposes
 mask = np.zeros_like(old_frame)
 
 modified_frames = []
+
 for frame in VR:
     start_time = time.time()
     
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # calculate optical flow
-    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
+    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray,
+                                           p0, None, **lk_params)
     if p1 is None:
         break
 
@@ -71,7 +73,7 @@ for frame in VR:
 
     elapsed_time = time.time() - start_time
     fps = str(int(1/elapsed_time)) if elapsed_time > 0 else "inf"
-	
+
     x, y = zip(*(np.squeeze(good_new)))
     minx, miny = int(min(x))-5, int(min(y))-5
     maxx, maxy = int(max(x))+5, int(max(y))+5
